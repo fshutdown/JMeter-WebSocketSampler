@@ -34,7 +34,7 @@ import org.eclipse.jetty.websocket.client.WebSocketClient;
 
 /**
  *
- * @author c003065
+ * @author Maciej Zaleski
  */
 public class WebSocketSampler extends AbstractSampler implements TestStateListener {
     private static final Logger log = LoggingManager.getLoggerForClass();
@@ -271,7 +271,7 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
     }
 
     public String getContentEncoding() {
-            return getPropertyAsString("contentEncoding");
+            return getPropertyAsString("contentEncoding", "UTF-8");
     }
 
     public void setRequestPayload(String requestPayload) {
@@ -359,7 +359,7 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
     }
 
     public String getMessageBacklog() {
-            return getPropertyAsString("messageBacklog");
+            return getPropertyAsString("messageBacklog", "3");
     }
 
     

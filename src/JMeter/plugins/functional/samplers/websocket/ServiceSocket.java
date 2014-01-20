@@ -23,7 +23,7 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
 /**
  *
- * @author c003065
+ * @author Maciej Zaleski
  */
 @WebSocket(maxTextMessageSize = 256 * 1024 * 1024)
 public class ServiceSocket {
@@ -201,7 +201,13 @@ public class ServiceSocket {
     }
 
     private void addResponseMessage(String message) {
-        int messageBacklog = Integer.parseInt(parent.getMessageBacklog());
+        int messageBacklog;
+        try {
+            messageBacklog = Integer.parseInt(parent.getMessageBacklog());
+        } catch (Exception ex) {
+            logMessage.append(" - Message backlog value not set; using default 3\n");
+            messageBacklog = 1;
+        }
 
         while (responeBacklog.size() >= messageBacklog) {
             responeBacklog.poll();

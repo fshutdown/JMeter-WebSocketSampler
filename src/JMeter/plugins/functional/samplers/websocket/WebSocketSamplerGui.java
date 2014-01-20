@@ -14,7 +14,7 @@ import org.apache.log.Logger;
 
 /**
  *
- * @author c003065
+ * @author Maciej Zaleski
  */
 public class WebSocketSamplerGui extends AbstractSamplerGui {
 
