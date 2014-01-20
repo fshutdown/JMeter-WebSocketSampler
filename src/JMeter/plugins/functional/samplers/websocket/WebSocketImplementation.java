@@ -6,7 +6,7 @@ package JMeter.plugins.functional.samplers.websocket;
 
 /**
  *
- * @author c003065
+ * @author Maciej Zaleski
  */
 public enum WebSocketImplementation {
     RFC6455
