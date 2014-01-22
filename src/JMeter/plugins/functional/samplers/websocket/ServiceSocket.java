@@ -33,6 +33,7 @@ public class ServiceSocket {
     Deque<String> responeBacklog = new LinkedList<String>();
     private Integer error = 0;
     private StringBuffer logMessage = new StringBuffer();
+    private CountDownLatch openLatch = new CountDownLatch(1);
     private CountDownLatch closeLatch = new CountDownLatch(1);
     private Session session = null;
     private String responsePattern;
@@ -48,7 +49,7 @@ public class ServiceSocket {
         disconnectPattern = new CompoundVariable(parent.getCloseConncectionPattern()).execute();
         logMessage.append("\n\n[Execution Flow]\n");
         logMessage.append(" - Opening new connection\n");
-        initializePatterns();        
+        initializePatterns();
     }
 
     @OnWebSocketMessage
@@ -78,6 +79,7 @@ public class ServiceSocket {
         log.debug("Connect " + session.isOpen());
         this.session = session;
         connected = true;
+        openLatch.countDown();
     }
 
     @OnWebSocketClose
@@ -90,6 +92,7 @@ public class ServiceSocket {
             logMessage.append(" - WebSocket conection has been successfully closed by the server").append("\n");
             log.debug("Disconnect " + statusCode + ": " + reason);
         }
+        openLatch.countDown();
         closeLatch.countDown();
         connected = false;
     }
@@ -115,6 +118,19 @@ public class ServiceSocket {
             close(StatusCode.NORMAL, "JMeter closed session.");
         } else {
             logMessage.append(" - Leaving streaming connection open").append("\n");
+        }
+
+        return res;
+    }
+
+    public boolean awaitOpen(int duration, TimeUnit unit) throws InterruptedException {
+        logMessage.append(" - Waiting for the server connection for ").append(duration).append(" ").append(unit.toString()).append("\n");
+        boolean res = this.openLatch.await(duration, unit);
+
+        if (connected) {
+            logMessage.append(" - Connection established").append("\n");
+        } else {
+            logMessage.append(" - Cannot connect to the remote server").append("\n");
         }
 
         return res;
