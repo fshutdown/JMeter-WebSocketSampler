@@ -62,6 +62,7 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
              if (connectionList.containsKey(connectionId)) {
                  socket = connectionList.get(connectionId);
                  socket.initialize();
+                 return socket;
              } else {
                 socket = new ServiceSocket(this);
                 connectionList.put(connectionId, socket);
@@ -78,6 +79,9 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
         ClientUpgradeRequest request = new ClientUpgradeRequest();
         webSocketClient.connect(socket, uri, request);
         
+        int connectionTimeout = Integer.parseInt(getConnectionTimeout());
+        socket.awaitOpen(connectionTimeout, TimeUnit.MILLISECONDS);
+        
         return socket;
     }
     
@@ -86,6 +90,8 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
         ServiceSocket socket = null;
         SampleResult sampleResult = new SampleResult();
         sampleResult.setSampleLabel(getName());
+        sampleResult.setDataEncoding(getContentEncoding());
+        
         StringBuilder errorList = new StringBuilder();
         errorList.append("\n\n[Problems]\n");
         
@@ -97,6 +103,14 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
 
         try {
             socket = getConnectionSocket();
+            if (socket == null) {
+                sampleResult.setResponseCode("500");
+                sampleResult.setSuccessful(false);
+                sampleResult.sampleEnd();
+                sampleResult.setResponseMessage(errorList.toString());
+                errorList.append(" - Connection couldn't be opened").append("\n");
+                return sampleResult;
+            }
             
             if (!payloadMessage.isEmpty()) {
                 socket.sendMessage(payloadMessage);
@@ -104,7 +118,7 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
 
             int responseTimeout = Integer.parseInt(getResponseTimeout());
             socket.awaitClose(responseTimeout, TimeUnit.MILLISECONDS);
-            sampleResult.setDataEncoding(getContentEncoding());
+            
             
             if (socket.getResponseMessage() == null || socket.getResponseMessage().isEmpty()) {
                 sampleResult.setResponseCode("204");
@@ -227,6 +241,15 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
     
     public void setResponseTimeout(String responseTimeout) {
         setProperty("responseTimeout", responseTimeout);
+    }    
+
+        
+    public String getConnectionTimeout() {
+        return getPropertyAsString("connectionTimeout", "5000");
+    }    
+    
+    public void setConnectionTimeout(String connectionTimeout) {
+        setProperty("connectionTimeout", connectionTimeout);
     }    
 
     public void setProtocol(String protocol) {
