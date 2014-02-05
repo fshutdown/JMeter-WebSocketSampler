@@ -37,6 +37,10 @@ import org.eclipse.jetty.websocket.client.WebSocketClient;
  * @author Maciej Zaleski
  */
 public class WebSocketSampler extends AbstractSampler implements TestStateListener {
+    public static int DEFAULT_CONNECTION_TIMEOUT = 20000; //20 sec
+    public static int DEFAULT_RESPONSE_TIMEOUT = 20000; //20 sec
+    public static int MESSAGE_BACKLOG_COUNT = 3;
+    
     private static final Logger log = LoggingManager.getLoggerForClass();
     
     private static final String ARG_VAL_SEP = "="; // $NON-NLS-1$
@@ -57,29 +61,39 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
 
         String connectionId = getThreadName() + getConnectionId();
         ServiceSocket socket;
-        WebSocketClient webSocketClient;
+
+        //Create WebSocket client
+        SslContextFactory sslContexFactory = new SslContextFactory();
+        sslContexFactory.setTrustAll(isIgnoreSslErrors());
+        WebSocketClient webSocketClient = new WebSocketClient(sslContexFactory);        
+        
         if (isStreamingConnection()) {
              if (connectionList.containsKey(connectionId)) {
                  socket = connectionList.get(connectionId);
                  socket.initialize();
                  return socket;
              } else {
-                socket = new ServiceSocket(this);
+                socket = new ServiceSocket(this, webSocketClient);
                 connectionList.put(connectionId, socket);
              }
         } else {
-            socket = new ServiceSocket(this);
+            socket = new ServiceSocket(this, webSocketClient);
         }
 
-        SslContextFactory sslContexFactory = new SslContextFactory();
-        sslContexFactory.setTrustAll(isIgnoreSslErrors());
-        webSocketClient = new WebSocketClient(sslContexFactory);
-        
+        //Start WebSocket client thread and upgrage HTTP connection
         webSocketClient.start();
         ClientUpgradeRequest request = new ClientUpgradeRequest();
         webSocketClient.connect(socket, uri, request);
         
-        int connectionTimeout = Integer.parseInt(getConnectionTimeout());
+        //Get connection timeout or use the default value
+        int connectionTimeout;
+        try {
+            connectionTimeout = Integer.parseInt(getConnectionTimeout());
+        } catch (NumberFormatException ex) {
+            log.warn("Connection timeout is not a number; using the default connection timeout of " + DEFAULT_CONNECTION_TIMEOUT + "ms");
+            connectionTimeout = DEFAULT_CONNECTION_TIMEOUT;
+        }
+        
         socket.awaitOpen(connectionTimeout, TimeUnit.MILLISECONDS);
         
         return socket;
@@ -92,18 +106,23 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
         sampleResult.setSampleLabel(getName());
         sampleResult.setDataEncoding(getContentEncoding());
         
+        //This StringBuilder will track all exceptions related to the protocol processing
         StringBuilder errorList = new StringBuilder();
         errorList.append("\n\n[Problems]\n");
         
         boolean isOK = false;
 
+        //Set the message payload in the Sampler
         String payloadMessage = getRequestPayload();
         sampleResult.setSamplerData(payloadMessage);
+        
+        //Could improve precission by moving this closer to the action
         sampleResult.sampleStart();
 
         try {
             socket = getConnectionSocket();
             if (socket == null) {
+                //Couldn't open a connection, set the status and exit
                 sampleResult.setResponseCode("500");
                 sampleResult.setSuccessful(false);
                 sampleResult.sampleEnd();
@@ -112,18 +131,31 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
                 return sampleResult;
             }
             
+            //Send message only if it is not empty
             if (!payloadMessage.isEmpty()) {
                 socket.sendMessage(payloadMessage);
             }
 
-            int responseTimeout = Integer.parseInt(getResponseTimeout());
+            int responseTimeout;
+            try {
+                responseTimeout = Integer.parseInt(getResponseTimeout());
+            } catch (NumberFormatException ex) {
+                log.warn("Request timeout is not a number; using the default request timeout of " + DEFAULT_RESPONSE_TIMEOUT + "ms");
+                responseTimeout = DEFAULT_RESPONSE_TIMEOUT;
+            }
+            
+            //Wait for any of the following:
+            // - Response matching response pattern is received
+            // - Response matching connection closing pattern is received
+            // - Timeout is reached
             socket.awaitClose(responseTimeout, TimeUnit.MILLISECONDS);
             
-            
+            //If no response is received set code 204; actually not used...needs to do something else
             if (socket.getResponseMessage() == null || socket.getResponseMessage().isEmpty()) {
                 sampleResult.setResponseCode("204");
             }
             
+            //Set sampler response code
             if (socket.getError() != 0) {
                 isOK = false;
                 sampleResult.setResponseCode(socket.getError().toString());
@@ -132,6 +164,7 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
                 isOK = true;
             }
             
+            //set sampler response
             sampleResult.setResponseData(socket.getResponseMessage(), getContentEncoding());
             
         } catch (URISyntaxException e) {

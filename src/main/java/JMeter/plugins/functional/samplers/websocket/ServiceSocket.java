@@ -20,6 +20,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import org.eclipse.jetty.websocket.client.WebSocketClient;
 
 /**
  *
@@ -28,23 +29,27 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 @WebSocket(maxTextMessageSize = 256 * 1024 * 1024)
 public class ServiceSocket {
 
-    private final WebSocketSampler parent;
+    protected final WebSocketSampler parent;
+    protected WebSocketClient client;
     private static final Logger log = LoggingManager.getLoggerForClass();
-    Deque<String> responeBacklog = new LinkedList<String>();
-    private Integer error = 0;
-    private StringBuffer logMessage = new StringBuffer();
-    private CountDownLatch openLatch = new CountDownLatch(1);
-    private CountDownLatch closeLatch = new CountDownLatch(1);
-    private Session session = null;
-    private String responsePattern;
-    private String disconnectPattern;
-    private int messageCounter = 1;
-    private Pattern responseExpression;
-    private Pattern disconnectExpression;
-    private boolean connected = false;
+    protected Deque<String> responeBacklog = new LinkedList<String>();
+    protected Integer error = 0;
+    protected StringBuffer logMessage = new StringBuffer();
+    protected CountDownLatch openLatch = new CountDownLatch(1);
+    protected CountDownLatch closeLatch = new CountDownLatch(1);
+    protected Session session = null;
+    protected String responsePattern;
+    protected String disconnectPattern;
+    protected int messageCounter = 1;
+    protected Pattern responseExpression;
+    protected Pattern disconnectExpression;
+    protected boolean connected = false;
 
-    public ServiceSocket(WebSocketSampler parent) {
+    public ServiceSocket(WebSocketSampler parent, WebSocketClient client) {
         this.parent = parent;
+        this.client = client;
+        
+        //Evaluate response matching patterns in case thay contain JMeter variables (i.e. ${var})
         responsePattern = new CompoundVariable(parent.getResponsePattern()).execute();
         disconnectPattern = new CompoundVariable(parent.getCloseConncectionPattern()).execute();
         logMessage.append("\n\n[Execution Flow]\n");
@@ -59,7 +64,7 @@ public class ServiceSocket {
             String length = " (" + msg.length() + " bytes)";
             logMessage.append(" - Received message #").append(messageCounter).append(length);
             addResponseMessage("[Message " + (messageCounter++) + "]\n" + msg + "\n\n");
-            
+
             if (responseExpression == null || responseExpression.matcher(msg).find()) {
                 logMessage.append("; matched response pattern").append("\n");
                 closeLatch.countDown();
@@ -92,16 +97,20 @@ public class ServiceSocket {
             logMessage.append(" - WebSocket conection has been successfully closed by the server").append("\n");
             log.debug("Disconnect " + statusCode + ": " + reason);
         }
+        
+        //Notify connection opening and closing latches of the closed connection
         openLatch.countDown();
         closeLatch.countDown();
         connected = false;
     }
 
     /**
-     * @return the responseMessage
+     * @return response message made of messages saved in the responeBacklog cache
      */
     public String getResponseMessage() {
         String responseMessage = "";
+        
+        //Iterate through response messages saved in the responeBacklog cache
         Iterator<String> iterator = responeBacklog.iterator();
         while (iterator.hasNext()) {
             responseMessage += iterator.next();
@@ -152,10 +161,22 @@ public class ServiceSocket {
     }
 
     public void close(int statusCode, String statusText) {
+        //Closing WebSocket session
         if (session != null) {
             session.close(statusCode, statusText);
+            logMessage.append(" - WebSocket session closed by the client").append("\n");
+        } else {
+            logMessage.append(" - WebSocket session wasn't started (...that's odd)").append("\n");
         }
-        logMessage.append(" - WebSocket conection closed by the client").append("\n");
+        
+        
+        //Stoping WebSocket client; thanks m0ro
+        try {
+            client.stop();
+            logMessage.append(" - WebSocket client closed by the client").append("\n");
+        } catch (Exception e) {
+            logMessage.append(" - WebSocket client wasn't started (...that's odd)").append("\n");
+        }
     }
 
     /**
@@ -179,7 +200,7 @@ public class ServiceSocket {
         logMessage.append(message);
     }
 
-    private void initializePatterns() {
+    protected void initializePatterns() {
         try {
             logMessage.append(" - Using response message pattern \"").append(responsePattern).append("\"\n");
             responseExpression = (responsePattern != null || !responsePattern.isEmpty()) ? Pattern.compile(responsePattern) : null;
@@ -221,8 +242,8 @@ public class ServiceSocket {
         try {
             messageBacklog = Integer.parseInt(parent.getMessageBacklog());
         } catch (Exception ex) {
-            logMessage.append(" - Message backlog value not set; using default 3\n");
-            messageBacklog = 1;
+            logMessage.append(" - Message backlog value not set; using default ").append(WebSocketSampler.MESSAGE_BACKLOG_COUNT).append("\n");
+            messageBacklog = WebSocketSampler.MESSAGE_BACKLOG_COUNT;
         }
 
         while (responeBacklog.size() >= messageBacklog) {
