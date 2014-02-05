@@ -481,6 +481,9 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="proxyAddressTextField">
+          <Properties>
+            <Property name="enabled" type="boolean" value="false"/>
+          </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel11">
           <Properties>
@@ -488,6 +491,9 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="proxyPortTextField">
+          <Properties>
+            <Property name="enabled" type="boolean" value="false"/>
+          </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel12">
           <Properties>
@@ -495,6 +501,9 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="proxyUsernameTextField">
+          <Properties>
+            <Property name="enabled" type="boolean" value="false"/>
+          </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel13">
           <Properties>
@@ -502,6 +511,9 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="proxyPasswordTextField">
+          <Properties>
+            <Property name="enabled" type="boolean" value="false"/>
+          </Properties>
         </Component>
       </SubComponents>
     </Container>
