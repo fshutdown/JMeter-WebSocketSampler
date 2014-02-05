@@ -293,11 +293,19 @@ public class WebSocketSamplerPanel extends javax.swing.JPanel {
 
         jLabel10.setText("Server Name or IP:");
 
+        proxyAddressTextField.setEnabled(false);
+
         jLabel11.setText("Port Number:");
+
+        proxyPortTextField.setEnabled(false);
 
         jLabel12.setText("Username:");
 
+        proxyUsernameTextField.setEnabled(false);
+
         jLabel13.setText("Password:");
+
+        proxyPasswordTextField.setEnabled(false);
 
         javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
         jPanel6.setLayout(jPanel6Layout);
