@@ -8,6 +8,9 @@ import java.io.IOException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.config.Argument;
 import org.apache.jmeter.config.Arguments;
+import org.apache.jmeter.protocol.http.control.CookieManager;
+import org.apache.jmeter.protocol.http.control.Header;
+import org.apache.jmeter.protocol.http.control.HeaderManager;
 import org.apache.jmeter.protocol.http.util.EncoderCache;
 import org.apache.jmeter.protocol.http.util.HTTPArgument;
 import org.apache.jmeter.protocol.http.util.HTTPConstants;
@@ -22,12 +25,14 @@ import org.apache.log.Logger;
 
 
 import java.io.UnsupportedEncodingException;
+import java.net.HttpCookie;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.apache.jmeter.testelement.TestStateListener;
+import org.eclipse.jetty.util.HttpCookieStore;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
@@ -50,6 +55,9 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
     private static final String DEFAULT_PROTOCOL = "ws";
     
     private static Map<String, ServiceSocket> connectionList;
+
+    private HeaderManager headerManager;
+    private CookieManager cookieManager;
 
     public WebSocketSampler() {
         super();
@@ -81,8 +89,25 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
         }
 
         //Start WebSocket client thread and upgrage HTTP connection
+        if (cookieManager != null) {
+            HttpCookieStore cookieStore = new HttpCookieStore();
+            for (int i = 0; i < cookieManager.getCookieCount(); i++)
+                cookieStore.add(
+                        new URI(null,
+                                cookieManager.get(i).getDomain(),
+                                cookieManager.get(i).getPath(),
+                                null),
+                        new HttpCookie(cookieManager.get(i).getName(), cookieManager.get(i).getValue()));
+            webSocketClient.setCookieStore(cookieStore);
+        }
         webSocketClient.start();
         ClientUpgradeRequest request = new ClientUpgradeRequest();
+        if (headerManager != null) {
+            for (int i = 0; i < headerManager.size(); i++) {
+                Header header = headerManager.get(i);
+                request.setHeader(header.getName(), header.getValue());
+            }
+        }
         webSocketClient.connect(socket, uri, request);
         
         //Get connection timeout or use the default value
@@ -495,6 +520,13 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
         }
     }
 
-
-
+    public void addTestElement(TestElement el) {
+        if (el instanceof HeaderManager) {
+            headerManager = (HeaderManager) el;
+        } else if (el instanceof CookieManager) {
+            cookieManager = (CookieManager) el;
+        } else {
+            super.addTestElement(el);
+        }
+    }
 }
