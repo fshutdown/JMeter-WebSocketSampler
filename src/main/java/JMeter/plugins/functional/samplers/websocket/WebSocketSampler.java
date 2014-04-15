@@ -191,7 +191,10 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
             
             //set sampler response
             sampleResult.setResponseData(socket.getResponseMessage(), getContentEncoding());
-            
+
+            if (getClearBacklog())
+                socket.clearBacklog();
+
         } catch (URISyntaxException e) {
             errorList.append(" - Invalid URI syntax: ").append(e.getMessage()).append("\n").append(StringUtils.join(e.getStackTrace(), "\n")).append("\n");
         } catch (IOException e) {
@@ -443,8 +446,14 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
             return getPropertyAsString("messageBacklog", "3");
     }
 
-    
-    
+    public void setClearBacklog(Boolean clearBacklog) {
+        setProperty("clearBacklog", clearBacklog);
+    }
+
+    public Boolean getClearBacklog() {
+        return getPropertyAsBoolean("clearBacklog", false);
+    }
+
     public String getQueryString(String contentEncoding) {
         // Check if the sampler has a specified content encoding
         if (JOrphanUtils.isBlank(contentEncoding)) {

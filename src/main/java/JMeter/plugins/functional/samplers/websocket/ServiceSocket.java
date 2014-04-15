@@ -119,6 +119,10 @@ public class ServiceSocket {
         return responseMessage;
     }
 
+    public void clearBacklog() {
+        responeBacklog.clear();
+    }
+
     public boolean awaitClose(int duration, TimeUnit unit) throws InterruptedException {
         logMessage.append(" - Waiting for messages for ").append(duration).append(" ").append(unit.toString()).append("\n");
         boolean res = this.closeLatch.await(duration, unit);

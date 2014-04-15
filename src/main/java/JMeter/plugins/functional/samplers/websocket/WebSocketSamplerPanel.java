@@ -71,6 +71,7 @@ public class WebSocketSamplerPanel extends javax.swing.JPanel {
         closeConncectionPatternTextField = new javax.swing.JTextField();
         jLabel16 = new javax.swing.JLabel();
         messageBacklogTextField = new javax.swing.JTextField();
+        clearBacklogCheckBox = new javax.swing.JCheckBox();
         jPanel6 = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
         proxyAddressTextField = new javax.swing.JTextField();
@@ -250,6 +251,8 @@ public class WebSocketSamplerPanel extends javax.swing.JPanel {
 
         jLabel16.setText("Message backlog:");
 
+        clearBacklogCheckBox.setText("Clear backlog");
+
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
@@ -264,7 +267,9 @@ public class WebSocketSamplerPanel extends javax.swing.JPanel {
                         .addGap(18, 18, 18)
                         .addComponent(jLabel16)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(messageBacklogTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(messageBacklogTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(clearBacklogCheckBox))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
                         .addComponent(jLabel9)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -276,6 +281,8 @@ public class WebSocketSamplerPanel extends javax.swing.JPanel {
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(clearBacklogCheckBox))
                     .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel16)
                         .addComponent(messageBacklogTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -413,6 +420,7 @@ public class WebSocketSamplerPanel extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField messageBacklogTextField;
+    private javax.swing.JCheckBox clearBacklogCheckBox;
     private javax.swing.JTextField protocolTextField;
     private javax.swing.JTextField proxyAddressTextField;
     private javax.swing.JTextField proxyPasswordTextField;
@@ -580,7 +588,15 @@ public class WebSocketSamplerPanel extends javax.swing.JPanel {
 
     public String getMessageBacklog() {
         return messageBacklogTextField.getText();
-    }    
+    }
+
+    public void setClearBacklog(Boolean clearBacklog) {
+        clearBacklogCheckBox.setSelected(clearBacklog);
+    }
+
+    public Boolean getClearBacklog() {
+        return clearBacklogCheckBox.isSelected();
+    }
 
     /**
      * @return the attributePanel
