@@ -91,13 +91,17 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
         //Start WebSocket client thread and upgrage HTTP connection
         if (cookieManager != null) {
             HttpCookieStore cookieStore = new HttpCookieStore();
-            for (int i = 0; i < cookieManager.getCookieCount(); i++)
+            for (int i = 0; i < cookieManager.getCookieCount(); i++) {
+                HttpCookie cookie = new HttpCookie(cookieManager.get(i).getName(), cookieManager.get(i).getValue());
+                cookie.setVersion(cookieManager.get(i).getVersion());
                 cookieStore.add(
                         new URI(null,
                                 cookieManager.get(i).getDomain(),
                                 cookieManager.get(i).getPath(),
                                 null),
-                        new HttpCookie(cookieManager.get(i).getName(), cookieManager.get(i).getValue()));
+                        cookie
+                );
+            }
             webSocketClient.setCookieStore(cookieStore);
         }
         webSocketClient.start();
