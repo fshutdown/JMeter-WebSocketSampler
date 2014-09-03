@@ -8,6 +8,7 @@ import java.io.IOException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.config.Argument;
 import org.apache.jmeter.config.Arguments;
+import org.apache.jmeter.protocol.http.control.CookieHandler;
 import org.apache.jmeter.protocol.http.control.CookieManager;
 import org.apache.jmeter.protocol.http.control.Header;
 import org.apache.jmeter.protocol.http.control.HeaderManager;
@@ -20,6 +21,8 @@ import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jmeter.testelement.property.*;
 import org.apache.jorphan.logging.LoggingManager;
+import org.apache.jorphan.reflect.ClassTools;
+import org.apache.jorphan.util.JMeterException;
 import org.apache.jorphan.util.JOrphanUtils;
 import org.apache.log.Logger;
 
@@ -28,6 +31,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpCookie;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -58,13 +62,14 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
 
     private HeaderManager headerManager;
     private CookieManager cookieManager;
+    private CookieHandler cookieHandler;
 
     public WebSocketSampler() {
         super();
         setName("WebSocket sampler");
     }
 
-    private ServiceSocket getConnectionSocket() throws URISyntaxException, Exception {
+    private ServiceSocket getConnectionSocket() throws Exception {
         URI uri = getUri();
 
         String connectionId = getThreadName() + getConnectionId();
@@ -124,7 +129,19 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
         }
         
         socket.awaitOpen(connectionTimeout, TimeUnit.MILLISECONDS);
-        
+
+        if (cookieManager != null && cookieHandler != null) {
+            String setCookieHeader = socket.getSession().getUpgradeResponse().getHeader("set-cookie");
+            if (setCookieHeader != null) {
+                cookieHandler.addCookieFromHeader(cookieManager, true, setCookieHeader, new URL(
+                        uri.getScheme() == null || uri.getScheme().equalsIgnoreCase("ws") ? "HTTP" : "HTTPS",
+                        uri.getHost(),
+                        uri.getPort(),
+                        uri.getQuery() != null ? uri.getPath() + "?" + uri.getQuery() : uri.getPath()
+                ));
+            }
+        }
+
         return socket;
     }
     
@@ -468,7 +485,7 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
         PropertyIterator iter =  getQueryStringParameters().iterator();
         boolean first = true;
         while (iter.hasNext()) {
-            HTTPArgument item = null;
+            HTTPArgument item;
             Object objectValue = iter.next().getObjectValue();
             try {
                 item = (HTTPArgument) objectValue;
@@ -506,8 +523,7 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
     }
 
     public Arguments getQueryStringParameters() {
-        Arguments args = (Arguments) getProperty("queryStringParameters").getObjectValue();
-        return args;
+        return (Arguments) getProperty("queryStringParameters").getObjectValue();
     }
 
 
@@ -518,7 +534,7 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
 
     @Override
     public void testStarted(String host) {
-        connectionList = new ConcurrentHashMap<String, ServiceSocket>();
+        connectionList = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -533,11 +549,17 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
         }
     }
 
+    @Override
     public void addTestElement(TestElement el) {
         if (el instanceof HeaderManager) {
             headerManager = (HeaderManager) el;
         } else if (el instanceof CookieManager) {
             cookieManager = (CookieManager) el;
+            try {
+                cookieHandler = (CookieHandler) ClassTools.construct(cookieManager.getImplementation(), cookieManager.getPolicy());
+            } catch (JMeterException e) {
+                log.error("Failed to construct cookie handler ", e);
+            }
         } else {
             super.addTestElement(el);
         }
