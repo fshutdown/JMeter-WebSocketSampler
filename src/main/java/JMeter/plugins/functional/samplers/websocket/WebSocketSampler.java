@@ -83,7 +83,7 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
         if (isStreamingConnection()) {
              if (connectionList.containsKey(connectionId)) {
                  socket = connectionList.get(connectionId);
-                 socket.initialize();
+                 socket.initialize(this);
                  return socket;
              } else {
                 socket = new ServiceSocket(this, webSocketClient);
