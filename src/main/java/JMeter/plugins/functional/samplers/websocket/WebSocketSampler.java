@@ -34,6 +34,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.apache.jmeter.testelement.TestStateListener;
 import org.eclipse.jetty.util.HttpCookieStore;
@@ -59,6 +61,7 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
     private static final String DEFAULT_PROTOCOL = "ws";
     
     private static Map<String, ServiceSocket> connectionList;
+    private static ExecutorService executor = Executors.newCachedThreadPool();
 
     private HeaderManager headerManager;
     private CookieManager cookieManager;
@@ -78,7 +81,7 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
         //Create WebSocket client
         SslContextFactory sslContexFactory = new SslContextFactory();
         sslContexFactory.setTrustAll(isIgnoreSslErrors());
-        WebSocketClient webSocketClient = new WebSocketClient(sslContexFactory);        
+        WebSocketClient webSocketClient = new WebSocketClient(sslContexFactory, executor);
         
         if (isStreamingConnection()) {
              if (connectionList.containsKey(connectionId)) {
