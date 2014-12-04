@@ -10,16 +10,21 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.log.Logger;
+
 import java.util.regex.Pattern;
+
 import org.apache.jmeter.engine.util.CompoundVariable;
 import org.apache.jorphan.logging.LoggingManager;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketFrame;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import org.eclipse.jetty.websocket.api.extensions.Frame;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 
 /**
@@ -77,6 +82,34 @@ public class ServiceSocket {
             }
         }
     }
+    
+	@OnWebSocketFrame
+	public void onFrame(Frame frame) {
+		synchronized (parent) {
+			log.debug("Received frame: " + frame.getPayload() + " "
+					+ frame.getType().name());
+			String length = " (" + frame.getPayloadLength() + " bytes)";
+			logMessage.append(" - Received frame #").append(messageCounter)
+					.append(length);
+			String frameTxt = new String(frame.getPayload().array());
+			addResponseMessage("[Frame " + (messageCounter++) + "]\n"
+					+ frameTxt + "\n\n");
+
+			if (responseExpression == null
+					|| responseExpression.matcher(frameTxt).find()) {
+				logMessage.append("; matched response pattern").append("\n");
+				closeLatch.countDown();
+			} else if (!disconnectPattern.isEmpty()
+					&& disconnectExpression.matcher(frameTxt).find()) {
+				logMessage.append("; matched connection close pattern").append(
+						"\n");
+				closeLatch.countDown();
+				close(StatusCode.NORMAL, "JMeter closed session.");
+			} else {
+				logMessage.append("; didn't match any pattern").append("\n");
+			}
+		}
+	}
 
     @OnWebSocketConnect
     public void onOpen(Session session) {
