@@ -5,6 +5,7 @@
 package JMeter.plugins.functional.samplers.websocket;
 
 import java.io.IOException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.config.Argument;
 import org.apache.jmeter.config.Arguments;
@@ -21,12 +22,17 @@ import org.apache.jorphan.util.JOrphanUtils;
 import org.apache.log.Logger;
 
 
+
+
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.jmeter.testelement.TestStateListener;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
@@ -50,6 +56,8 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
     private static final String DEFAULT_PROTOCOL = "ws";
     
     private static Map<String, ServiceSocket> connectionList;
+    
+    private static ExecutorService executor = Executors.newCachedThreadPool(); 
 
     public WebSocketSampler() {
         super();
@@ -60,24 +68,21 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
         URI uri = getUri();
 
         String connectionId = getThreadName() + getConnectionId();
-        ServiceSocket socket;
-
+        
+        if (isStreamingConnection() && connectionList.containsKey(connectionId)) {
+        	ServiceSocket socket = connectionList.get(connectionId);
+            socket.initialize();
+            return socket;
+        }
+        
         //Create WebSocket client
         SslContextFactory sslContexFactory = new SslContextFactory();
         sslContexFactory.setTrustAll(isIgnoreSslErrors());
-        WebSocketClient webSocketClient = new WebSocketClient(sslContexFactory);        
+        WebSocketClient webSocketClient = new WebSocketClient(sslContexFactory, executor);
         
+        ServiceSocket socket = new ServiceSocket(this, webSocketClient);
         if (isStreamingConnection()) {
-             if (connectionList.containsKey(connectionId)) {
-                 socket = connectionList.get(connectionId);
-                 socket.initialize();
-                 return socket;
-             } else {
-                socket = new ServiceSocket(this, webSocketClient);
-                connectionList.put(connectionId, socket);
-             }
-        } else {
-            socket = new ServiceSocket(this, webSocketClient);
+            connectionList.put(connectionId, socket);
         }
 
         //Start WebSocket client thread and upgrage HTTP connection
