@@ -18,8 +18,30 @@
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
+                    <excludes>
+			            <exclude>**\JMeter\plugins\controler\websocketapp\**</exclude>
+			        </excludes>
                 </configuration>
             </plugin>
+            <plugin>
+		    <artifactId>maven-jar-plugin</artifactId>
+		    <version>2.3.1</version>
+		    <executions>
+		      <execution>
+		        <id>default-jar</id>
+		        <phase>package</phase>
+		        <goals>
+		          <goal>jar</goal>
+		        </goals>
+		        <configuration>
+		          <excludes>
+		            <exclude>**/JMeter/plugins/functional/controler/**/*</exclude>
+		            <exclude>**/JMeter/plugins/controler/websocketapp/**</exclude>
+		          </excludes>
+		        </configuration>
+		      </execution>
+		    </executions>
+		  </plugin>
         </plugins>
     </build>
     <properties>
