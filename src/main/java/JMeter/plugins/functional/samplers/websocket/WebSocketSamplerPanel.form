@@ -207,6 +207,8 @@
                                   <Component id="ignoreSslErrorsCheckBox" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                   <Component id="streamingConnectionCheckBox" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                  <Component id="resetStreamingConnectionCheckBox" min="-2" max="-2" attributes="0"/>
                               </Group>
                           </Group>
                           <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
@@ -244,6 +246,7 @@
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="ignoreSslErrorsCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="streamingConnectionCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="resetStreamingConnectionCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="querystringAttributesPanel" pref="102" max="32767" attributes="0"/>
@@ -330,6 +333,11 @@
         <Component class="javax.swing.JCheckBox" name="streamingConnectionCheckBox">
           <Properties>
             <Property name="text" type="java.lang.String" value="Streaming connection"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="resetStreamingConnectionCheckBox">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Reset streaming connection"/>
           </Properties>
         </Component>
       </SubComponents>
