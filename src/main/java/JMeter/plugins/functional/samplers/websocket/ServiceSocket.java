@@ -259,13 +259,17 @@ public class ServiceSocket {
         return connected;
     }
 
-    public void initialize() {
+    public void initialize(WebSocketSampler sampler) {
         logMessage = new StringBuffer();
         logMessage.append("\n\n[Execution Flow]\n");
         logMessage.append(" - Reusing exising connection\n");
         error = 0;
 
         this.closeLatch = new CountDownLatch(1);
+
+        this.responsePattern = new CompoundVariable(sampler.getResponsePattern()).execute();
+        this.disconnectPattern = new CompoundVariable(sampler.getCloseConncectionPattern()).execute();
+        initializePatterns();
     }
 
     private void addResponseMessage(String message) {
