@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log.Logger;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import org.apache.jmeter.engine.util.CompoundVariable;
@@ -33,7 +34,7 @@ import org.eclipse.jetty.websocket.client.WebSocketClient;
 @WebSocket(maxTextMessageSize = 256 * 1024 * 1024)
 public class ServiceSocket {
 
-    protected final WebSocketSampler parent;
+    protected WebSocketSampler parent;
     protected WebSocketClient client;
     private static final Logger log = LoggingManager.getLoggerForClass();
     protected Deque<String> responeBacklog = new ConcurrentLinkedDeque<>();
@@ -44,7 +45,7 @@ public class ServiceSocket {
     protected Session session = null;
     protected String responsePattern;
     protected String disconnectPattern;
-    protected int messageCounter = 1;
+    protected AtomicInteger messageCounter = new AtomicInteger(1);
     protected Pattern responseExpression;
     protected Pattern disconnectExpression;
     protected boolean connected = false;
@@ -52,7 +53,7 @@ public class ServiceSocket {
     public ServiceSocket(WebSocketSampler parent, WebSocketClient client) {
         this.parent = parent;
         this.client = client;
-        
+
         //Evaluate response matching patterns in case thay contain JMeter variables (i.e. ${var})
         responsePattern = new CompoundVariable(parent.getResponsePattern()).execute();
         disconnectPattern = new CompoundVariable(parent.getCloseConncectionPattern()).execute();
@@ -63,52 +64,48 @@ public class ServiceSocket {
 
     @OnWebSocketMessage
     public void onMessage(String msg) {
-        synchronized (parent) {
-            log.debug("Received message: " + msg);
-            String length = " (" + msg.length() + " bytes)";
-            logMessage.append(" - Received message #").append(messageCounter).append(length);
-            addResponseMessage("[Message " + (messageCounter++) + "]\n" + msg + "\n\n");
+        log.debug("Received message: " + msg);
+        String length = " (" + msg.length() + " bytes)";
+        logMessage.append(" - Received message #").append(messageCounter.get()).append(length);
+        addResponseMessage("[Message " + (messageCounter.getAndIncrement()) + "]\n" + msg + "\n\n");
 
-            if (responseExpression == null || responseExpression.matcher(msg).find()) {
-                logMessage.append("; matched response pattern").append("\n");
-                closeLatch.countDown();
-            } else if (!disconnectPattern.isEmpty() && disconnectExpression.matcher(msg).find()) {
-                logMessage.append("; matched connection close pattern").append("\n");
-                closeLatch.countDown();
-                close(StatusCode.NORMAL, "JMeter closed session.");
-            } else {
-                logMessage.append("; didn't match any pattern").append("\n");
-            }
+        if (responseExpression == null || responseExpression.matcher(msg).find()) {
+            logMessage.append("; matched response pattern").append("\n");
+            closeLatch.countDown();
+        } else if (!disconnectPattern.isEmpty() && disconnectExpression.matcher(msg).find()) {
+            logMessage.append("; matched connection close pattern").append("\n");
+            closeLatch.countDown();
+            close(StatusCode.NORMAL, "JMeter closed session.");
+        } else {
+            logMessage.append("; didn't match any pattern").append("\n");
         }
     }
-    
-	@OnWebSocketFrame
-	public void onFrame(Frame frame) {
-		synchronized (parent) {
-			log.debug("Received frame: " + frame.getPayload() + " "
-					+ frame.getType().name());
-			String length = " (" + frame.getPayloadLength() + " bytes)";
-			logMessage.append(" - Received frame #").append(messageCounter)
-					.append(length);
-			String frameTxt = new String(frame.getPayload().array());
-			addResponseMessage("[Frame " + (messageCounter++) + "]\n"
-					+ frameTxt + "\n\n");
 
-			if (responseExpression == null
-					|| responseExpression.matcher(frameTxt).find()) {
-				logMessage.append("; matched response pattern").append("\n");
-				closeLatch.countDown();
-			} else if (!disconnectPattern.isEmpty()
-					&& disconnectExpression.matcher(frameTxt).find()) {
-				logMessage.append("; matched connection close pattern").append(
-						"\n");
-				closeLatch.countDown();
-				close(StatusCode.NORMAL, "JMeter closed session.");
-			} else {
-				logMessage.append("; didn't match any pattern").append("\n");
-			}
-		}
-	}
+    @OnWebSocketFrame
+    public void onFrame(Frame frame) {
+        log.debug("Received frame: " + frame.getPayload() + " "
+                + frame.getType().name());
+        String length = " (" + frame.getPayloadLength() + " bytes)";
+        logMessage.append(" - Received frame #").append(messageCounter.get())
+                .append(length);
+        String frameTxt = new String(frame.getPayload().array());
+        addResponseMessage("[Frame " + (messageCounter.getAndIncrement()) + "]\n"
+                + frameTxt + "\n\n");
+
+        if (responseExpression == null
+                || responseExpression.matcher(frameTxt).find()) {
+            logMessage.append("; matched response pattern").append("\n");
+            closeLatch.countDown();
+        } else if (!disconnectPattern.isEmpty()
+                && disconnectExpression.matcher(frameTxt).find()) {
+            logMessage.append("; matched connection close pattern").append(
+                    "\n");
+            closeLatch.countDown();
+            close(StatusCode.NORMAL, "JMeter closed session.");
+        } else {
+            logMessage.append("; didn't match any pattern").append("\n");
+        }
+    }
 
     @OnWebSocketConnect
     public void onOpen(Session session) {
@@ -129,7 +126,7 @@ public class ServiceSocket {
             logMessage.append(" - WebSocket conection has been successfully closed by the server").append("\n");
             log.debug("Disconnect " + statusCode + ": " + reason);
         }
-        
+
         //Notify connection opening and closing latches of the closed connection
         openLatch.countDown();
         closeLatch.countDown();
@@ -141,7 +138,7 @@ public class ServiceSocket {
      */
     public String getResponseMessage() {
         String responseMessage = "";
-        
+
         //Iterate through response messages saved in the responeBacklog cache
         for (String aResponeBacklog : responeBacklog) {
             responseMessage += aResponeBacklog;
@@ -199,8 +196,8 @@ public class ServiceSocket {
         } else {
             logMessage.append(" - WebSocket session wasn't started (...that's odd)").append("\n");
         }
-        
-        
+
+
         //Stoping WebSocket client; thanks m0ro
         try {
             client.stop();
@@ -222,7 +219,7 @@ public class ServiceSocket {
      */
     public String getLogMessage() {
         logMessage.append("\n\n[Variables]\n");
-        logMessage.append(" - Message count: ").append(messageCounter - 1).append("\n");
+        logMessage.append(" - Message count: ").append(messageCounter.get() - 1).append("\n");
 
         return logMessage.toString();
     }
@@ -259,16 +256,17 @@ public class ServiceSocket {
         return connected;
     }
 
-    public void initialize(WebSocketSampler sampler) {
+    public void initialize(WebSocketSampler parent) {
         logMessage = new StringBuffer();
         logMessage.append("\n\n[Execution Flow]\n");
         logMessage.append(" - Reusing exising connection\n");
         error = 0;
 
         this.closeLatch = new CountDownLatch(1);
-
-        this.responsePattern = new CompoundVariable(sampler.getResponsePattern()).execute();
-        this.disconnectPattern = new CompoundVariable(sampler.getCloseConncectionPattern()).execute();
+        //update the parent - used for streaming connection when using the same connection but updating all other definitions of the sampler
+        this.parent = parent;
+        this.responsePattern = new CompoundVariable(parent.getResponsePattern()).execute();
+        this.disconnectPattern = new CompoundVariable(parent.getCloseConncectionPattern()).execute();
         initializePatterns();
     }
 
