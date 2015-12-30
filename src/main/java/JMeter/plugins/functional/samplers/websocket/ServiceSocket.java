@@ -5,6 +5,8 @@
 package JMeter.plugins.functional.samplers.websocket;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CountDownLatch;
@@ -34,6 +36,8 @@ import org.eclipse.jetty.websocket.client.WebSocketClient;
 @WebSocket(maxTextMessageSize = 256 * 1024 * 1024)
 public class ServiceSocket {
 
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
     protected WebSocketSampler parent;
     protected WebSocketClient client;
     private static final Logger log = LoggingManager.getLoggerForClass();
@@ -62,25 +66,6 @@ public class ServiceSocket {
         initializePatterns();
     }
 
-    @OnWebSocketMessage
-    public void onMessage(String msg) {
-        log.debug("Received message: " + msg);
-        String length = " (" + msg.length() + " bytes)";
-        logMessage.append(" - Received message #").append(messageCounter.get()).append(length);
-        addResponseMessage("[Message " + (messageCounter.getAndIncrement()) + "]\n" + msg + "\n\n");
-
-        if (responseExpression == null || responseExpression.matcher(msg).find()) {
-            logMessage.append("; matched response pattern").append("\n");
-            closeLatch.countDown();
-        } else if (!disconnectPattern.isEmpty() && disconnectExpression.matcher(msg).find()) {
-            logMessage.append("; matched connection close pattern").append("\n");
-            closeLatch.countDown();
-            close(StatusCode.NORMAL, "JMeter closed session.");
-        } else {
-            logMessage.append("; didn't match any pattern").append("\n");
-        }
-    }
-
     @OnWebSocketFrame
     public void onFrame(Frame frame) {
         log.debug("Received frame: " + frame.getPayload() + " "
@@ -89,7 +74,7 @@ public class ServiceSocket {
         logMessage.append(" - Received frame #").append(messageCounter.get())
                 .append(length);
         String frameTxt = new String(frame.getPayload().array());
-        addResponseMessage("[Frame " + (messageCounter.getAndIncrement()) + "]\n"
+        addResponseMessage("[Frame " + (messageCounter.getAndIncrement()) + ", Time: " + DATE_FORMAT.format(new Date()) +  "]\n"
                 + frameTxt + "\n\n");
 
         if (responseExpression == null
