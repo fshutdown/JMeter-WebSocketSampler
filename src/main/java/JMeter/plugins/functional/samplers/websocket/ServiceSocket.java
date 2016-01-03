@@ -94,7 +94,7 @@ public class ServiceSocket {
 
     @OnWebSocketConnect
     public void onOpen(Session session) {
-        logMessage.append(" - WebSocket conection has been opened").append("\n");
+        logMessage.append(" - WebSocket connection has been opened on ").append(session.getUpgradeRequest().getRequestURI().toString()).append("\n");
         log.debug("Connect " + session.isOpen());
         this.session = session;
         connected = true;
@@ -166,7 +166,7 @@ public class ServiceSocket {
     }
 
     public void sendMessage(String message) throws IOException {
-        session.getRemote().sendString(message);
+        session.getRemote().sendStringByFuture(message);
     }
 
     public void close() {
