@@ -10,6 +10,11 @@
 
     <name>JMeterWebSocketSampler</name>
     <url>http://maven.apache.org</url>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jetty.version>9.2.9.v20150224</jetty.version>
+        <jMeter.version>2.13</jMeter.version>
+    </properties>
     <build>
         <plugins>
             <plugin>
@@ -20,8 +25,8 @@
                     <source>1.7</source>
                     <target>1.7</target>
                     <excludes>
-			            <exclude>**\JMeter\plugins\controler\websocketapp\**</exclude>
-			        </excludes>
+                        <exclude>**\JMeter\plugins\controler\websocketapp\**</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <plugin>
@@ -43,9 +48,6 @@
         </plugins>
     </build>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -58,30 +60,75 @@
         <dependency>
             <groupId>org.eclipse.jetty.websocket</groupId>
             <artifactId>websocket-client</artifactId>
-      <version>9.1.1.v20140108</version>
-      <classifier>hybrid</classifier>
+            <version>${jetty.version}</version>
+            <classifier>hybrid</classifier>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.jmeter</groupId>
             <artifactId>ApacheJMeter</artifactId>
-            <version>2.10</version>
+            <version>${jMeter.version}</version>
             <type>jar</type>
             <scope>provided</scope>
+            <!--for some reason those jars are missing, and failing the package. since it is provided anyway - there is no implication for excluding them-->
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-math3</artifactId>
+                    <groupId>commons-math3</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-pool2</artifactId>
+                    <groupId>commons-pool2</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>d-haven-managed-pool</artifactId>
+                    <groupId>d-haven-managed-pool</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.jmeter</groupId>
             <artifactId>ApacheJMeter_core</artifactId>
-            <version>2.10</version>
+            <version>${jMeter.version}</version>
             <type>jar</type>
             <scope>provided</scope>
+            <!--for some reason those jars are missing, and failing the package. since it is provided anyway - there is no implication for excluding them-->
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-math3</artifactId>
+                    <groupId>commons-math3</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-pool2</artifactId>
+                    <groupId>commons-pool2</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>d-haven-managed-pool</artifactId>
+                    <groupId>d-haven-managed-pool</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.jmeter</groupId>
             <artifactId>ApacheJMeter_http</artifactId>
-            <version>2.10</version>
+            <version>${jMeter.version}</version>
             <type>jar</type>
             <scope>provided</scope>
+            <!--for some reason those jars are missing, and failing the package. since it is provided anyway - there is no implication for excluding them-->
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-math3</artifactId>
+                    <groupId>commons-math3</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>d-haven-managed-pool</artifactId>
+                    <groupId>d-haven-managed-pool</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-pool2</artifactId>
+                    <groupId>commons-pool2</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 </project>

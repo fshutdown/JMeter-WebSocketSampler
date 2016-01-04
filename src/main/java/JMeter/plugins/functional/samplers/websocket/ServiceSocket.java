@@ -66,25 +66,18 @@ public class ServiceSocket {
         initializePatterns();
     }
 
-    @OnWebSocketFrame
-    public void onFrame(Frame frame) {
-        log.debug("Received frame: " + frame.getPayload() + " "
-                + frame.getType().name());
-        String length = " (" + frame.getPayloadLength() + " bytes)";
-        logMessage.append(" - Received frame #").append(messageCounter.get())
-                .append(length);
-        String frameTxt = new String(frame.getPayload().array());
-        addResponseMessage("[Frame " + (messageCounter.getAndIncrement()) + ", Time: " + DATE_FORMAT.format(new Date()) +  "]\n"
-                + frameTxt + "\n\n");
+    @OnWebSocketMessage
+    public void onMessage(String msg) {
+//            log.info("Received message: " + msg);
+        String length = " (" + msg.length() + " bytes)";
+        logMessage.append(" - Received message #").append(messageCounter).append(length);
+        addResponseMessage("[Message " + messageCounter.getAndIncrement() + ", Time: " + DATE_FORMAT.format(new Date()) + "]\n" + msg + "\n\n");
 
-        if (responseExpression == null
-                || responseExpression.matcher(frameTxt).find()) {
+        if (responseExpression == null || responseExpression.matcher(msg).find()) {
             logMessage.append("; matched response pattern").append("\n");
             closeLatch.countDown();
-        } else if (!disconnectPattern.isEmpty()
-                && disconnectExpression.matcher(frameTxt).find()) {
-            logMessage.append("; matched connection close pattern").append(
-                    "\n");
+        } else if (!disconnectPattern.isEmpty() && disconnectExpression.matcher(msg).find()) {
+            logMessage.append("; matched connection close pattern").append("\n");
             closeLatch.countDown();
             close(StatusCode.NORMAL, "JMeter closed session.");
         } else {
