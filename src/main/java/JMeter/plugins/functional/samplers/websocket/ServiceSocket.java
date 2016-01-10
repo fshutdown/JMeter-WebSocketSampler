@@ -4,6 +4,18 @@
  */
 package JMeter.plugins.functional.samplers.websocket;
 
+import org.apache.jmeter.engine.util.CompoundVariable;
+import org.apache.jorphan.logging.LoggingManager;
+import org.apache.log.Logger;
+import org.eclipse.jetty.websocket.api.BatchMode;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.StatusCode;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import org.eclipse.jetty.websocket.client.WebSocketClient;
+
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -11,29 +23,13 @@ import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.log.Logger;
-
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
-import org.apache.jmeter.engine.util.CompoundVariable;
-import org.apache.jorphan.logging.LoggingManager;
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.StatusCode;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketFrame;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
-import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import org.eclipse.jetty.websocket.api.extensions.Frame;
-import org.eclipse.jetty.websocket.client.WebSocketClient;
-
 /**
- *
  * @author Maciej Zaleski
  */
-@WebSocket(maxTextMessageSize = 256 * 1024 * 1024)
+@WebSocket(batchMode = BatchMode.OFF, maxTextMessageSize = 256 * 1024 * 1024)
 public class ServiceSocket {
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -159,7 +155,7 @@ public class ServiceSocket {
     }
 
     public void sendMessage(String message) throws IOException {
-        session.getRemote().sendStringByFuture(message);
+        session.getRemote().sendString(message);
     }
 
     public void close() {
