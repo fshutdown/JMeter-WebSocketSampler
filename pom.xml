@@ -15,8 +15,20 @@
         <jetty.version>9.2.14.v20151106</jetty.version>
         <jMeter.version>2.13</jMeter.version>
     </properties>
+
+    <scm>
+    	<connection>scm:git:https://github.com/elyrank/JMeter-WebSocketSampler.git</connection>
+    	<url>scm:git:https://github.com/elyrank/JMeter-WebSocketSampler.git</url>
+    	<developerConnection>scm:git:https://github.com/elyrank/JMeter-WebSocketSampler.git</developerConnection>
+    </scm>
+
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.1</version>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
