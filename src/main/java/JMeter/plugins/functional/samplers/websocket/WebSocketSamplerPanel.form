@@ -353,7 +353,9 @@
                           <Component id="jLabel7" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="responsePatternTextField" max="32767" attributes="0"/>
-                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Component id="overrideResponsePatternCheckBox" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
                           <Component id="jLabel16" min="-2" max="-2" attributes="0"/>
                           <EmptySpace min="-2" max="-2" attributes="0"/>
                           <Component id="messageBacklogTextField" min="-2" pref="40" max="-2" attributes="0"/>
@@ -362,6 +364,8 @@
                           <Component id="jLabel9" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="closeConncectionPatternTextField" max="32767" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="overrideDisconnectPatternCheckBox" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -376,6 +380,7 @@
                       <Group type="103" alignment="0" groupAlignment="3" attributes="0">
                           <Component id="jLabel16" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="messageBacklogTextField" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="overrideResponsePatternCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="jLabel7" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -386,6 +391,7 @@
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="jLabel9" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="closeConncectionPatternTextField" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="overrideDisconnectPatternCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
@@ -413,6 +419,16 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="messageBacklogTextField">
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="overrideResponsePatternCheckBox">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Override previous"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="overrideDisconnectPatternCheckBox">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Override previous"/>
+          </Properties>
         </Component>
       </SubComponents>
     </Container>
