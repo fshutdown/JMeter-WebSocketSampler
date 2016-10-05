@@ -7,7 +7,8 @@ package JMeter.plugins.functional.samplers.websocket;
 import java.io.IOException;
 import java.util.Deque;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -37,7 +38,7 @@ public class ServiceSocket {
     protected final WebSocketSampler parent;
     protected WebSocketClient client;
     private static final Logger log = LoggingManager.getLoggerForClass();
-    protected Deque<String> responeBacklog = new LinkedList<String>();
+    protected Queue responeBacklog = new ConcurrentLinkedQueue();
     protected Integer error = 0;
     protected StringBuffer logMessage = new StringBuffer();
     protected CountDownLatch openLatch = new CountDownLatch(1);
