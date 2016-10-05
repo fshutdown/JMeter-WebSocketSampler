@@ -594,7 +594,23 @@ public class WebSocketSamplerPanel extends javax.swing.JPanel {
 
     public String getMessageBacklog() {
         return messageBacklogTextField.getText();
-    }    
+    }
+    
+    public void setOverrideResponsePattern(Boolean overrideResponsePattern) {
+        overrideResponsePatternCheckBox.setSelected(overrideResponsePattern);
+    }
+    
+    public Boolean isOverrideResponsePattern() {
+        return overrideResponsePatternCheckBox.isSelected();
+    }
+    
+    public void setOverrideDisconnectPattern(Boolean overrideDisconnectPattern) {
+        overrideDisconnectPatternCheckBox.setSelected(overrideDisconnectPattern);
+    }
+    
+    public Boolean isOverrideDisconnectPattern() {
+        return overrideDisconnectPatternCheckBox.isSelected();
+    }
 
     /**
      * @return the attributePanel

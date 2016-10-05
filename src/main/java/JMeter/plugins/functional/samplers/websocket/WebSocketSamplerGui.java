@@ -67,6 +67,8 @@ public class WebSocketSamplerGui extends AbstractSamplerGui {
             webSocketSamplerPanel.setProxyPort(webSocketSamplerTestElement.getProxyPort());
             webSocketSamplerPanel.setProxyUsername(webSocketSamplerTestElement.getProxyUsername());
             webSocketSamplerPanel.setMessageBacklog(webSocketSamplerTestElement.getMessageBacklog());
+            webSocketSamplerPanel.setOverrideResponsePattern(webSocketSamplerTestElement.isOverrideResponsePattern());
+            webSocketSamplerPanel.setOverrideDisconnectPattern(webSocketSamplerTestElement.isOverrideDisconnectPattern());
 
             Arguments queryStringParameters = webSocketSamplerTestElement.getQueryStringParameters();
             if (queryStringParameters != null) {
@@ -106,6 +108,9 @@ public class WebSocketSamplerGui extends AbstractSamplerGui {
             webSocketSamplerTestElement.setProxyPort(webSocketSamplerPanel.getProxyPort());
             webSocketSamplerTestElement.setProxyUsername(webSocketSamplerPanel.getProxyUsername());
             webSocketSamplerTestElement.setMessageBacklog(webSocketSamplerPanel.getMessageBacklog());
+            webSocketSamplerTestElement.setOverrideResponsePattern(webSocketSamplerPanel.isOverrideResponsePattern());
+            webSocketSamplerTestElement.setOverrideDisconnectPattern(webSocketSamplerPanel.isOverrideDisconnectPattern());
+
 
             ArgumentsPanel queryStringParameters = webSocketSamplerPanel.getAttributePanel();
             if (queryStringParameters != null) {
