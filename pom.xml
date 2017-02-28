@@ -1,16 +1,34 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <groupId>co.uk.bugtrap</groupId>
-  <artifactId>JMeterWebSocketSampler</artifactId>
-  <version>1.0.2-SNAPSHOT</version>
-  <packaging>jar</packaging>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>co.uk.bugtrap</groupId>
+    <artifactId>JMeterWebSocketSampler</artifactId>
+    <version>1.1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
-  <name>JMeterWebSocketSampler</name>
-  <url>http://maven.apache.org</url>
+    <name>JMeterWebSocketSampler</name>
+    <url>http://maven.apache.org</url>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jetty.version>9.2.14.v20151106</jetty.version>
+        <jMeter.version>2.13</jMeter.version>
+    </properties>
+
+    <scm>
+    	<connection>scm:git:https://github.com/elyrank/JMeter-WebSocketSampler.git</connection>
+    	<url>scm:git:https://github.com/elyrank/JMeter-WebSocketSampler.git</url>
+    	<developerConnection>scm:git:https://github.com/elyrank/JMeter-WebSocketSampler.git</developerConnection>
+    </scm>
+
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.1</version>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -19,62 +37,110 @@
                     <source>1.7</source>
                     <target>1.7</target>
                     <excludes>
-			            <exclude>**\JMeter\plugins\controler\websocketapp\**</exclude>
-			        </excludes>
+                        <exclude>**\JMeter\plugins\controler\websocketapp\**</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <plugin>
-		    <artifactId>maven-jar-plugin</artifactId>
-		    <version>2.3.1</version>
-		    <executions>
-		      <execution>
-		        <id>default-jar</id>
-		        <phase>package</phase>
-		        <goals>
-		          <goal>jar</goal>
-		        </goals>
-		        <configuration>
-		          <excludes>
-		            <exclude>**/JMeter/plugins/functional/controler/**/*</exclude>
-		            <exclude>**/JMeter/plugins/controler/websocketapp/**</exclude>
-		          </excludes>
-		        </configuration>
-		      </execution>
-		    </executions>
-		  </plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.0</version>
+                <configuration>
+                    <outputFile>target/${project.name}-dist-${project.version}.jar</outputFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
-    <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
 
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty.websocket</groupId>
-      <artifactId>websocket-client</artifactId>
-      <version>9.1.1.v20140108</version>
-      <classifier>hybrid</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.jmeter</groupId>
-      <artifactId>ApacheJMeter</artifactId>
-      <version>2.10</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.jmeter</groupId>
-      <artifactId>ApacheJMeter_core</artifactId>
-      <version>2.10</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.jmeter</groupId>
-      <artifactId>ApacheJMeter_http</artifactId>
-      <version>2.10</version>
-    </dependency>
-  </dependencies>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <!--scope>test</scope-->
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty.websocket</groupId>
+            <artifactId>websocket-client</artifactId>
+            <version>${jetty.version}</version>
+            <classifier>hybrid</classifier>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.jmeter</groupId>
+            <artifactId>ApacheJMeter</artifactId>
+            <version>${jMeter.version}</version>
+            <type>jar</type>
+            <scope>provided</scope>
+            <!--for some reason those jars are missing, and failing the package. since it is provided anyway - there is no implication for excluding them-->
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-math3</artifactId>
+                    <groupId>commons-math3</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-pool2</artifactId>
+                    <groupId>commons-pool2</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>d-haven-managed-pool</artifactId>
+                    <groupId>d-haven-managed-pool</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.jmeter</groupId>
+            <artifactId>ApacheJMeter_core</artifactId>
+            <version>${jMeter.version}</version>
+            <type>jar</type>
+            <scope>provided</scope>
+            <!--for some reason those jars are missing, and failing the package. since it is provided anyway - there is no implication for excluding them-->
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-math3</artifactId>
+                    <groupId>commons-math3</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-pool2</artifactId>
+                    <groupId>commons-pool2</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>d-haven-managed-pool</artifactId>
+                    <groupId>d-haven-managed-pool</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.jmeter</groupId>
+            <artifactId>ApacheJMeter_http</artifactId>
+            <version>${jMeter.version}</version>
+            <type>jar</type>
+            <scope>provided</scope>
+            <!--for some reason those jars are missing, and failing the package. since it is provided anyway - there is no implication for excluding them-->
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-math3</artifactId>
+                    <groupId>commons-math3</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>d-haven-managed-pool</artifactId>
+                    <groupId>d-haven-managed-pool</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-pool2</artifactId>
+                    <groupId>commons-pool2</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
 </project>
