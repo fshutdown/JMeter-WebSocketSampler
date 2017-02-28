@@ -64,6 +64,7 @@ public class WebSocketSamplerPanel extends javax.swing.JPanel {
         jLabel15 = new javax.swing.JLabel();
         implementationComboBox = new javax.swing.JComboBox();
         streamingConnectionCheckBox = new javax.swing.JCheckBox();
+        resetStreamingConnectionCheckBox = new javax.swing.JCheckBox();
         jPanel5 = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
         responsePatternTextField = new javax.swing.JTextField();
@@ -172,6 +173,8 @@ public class WebSocketSamplerPanel extends javax.swing.JPanel {
         implementationComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "RFC6455 (v13)" }));
 
         streamingConnectionCheckBox.setText("Streaming connection");
+        
+        resetStreamingConnectionCheckBox.setText("Reset streaming connection");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -204,7 +207,9 @@ public class WebSocketSamplerPanel extends javax.swing.JPanel {
                             .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addComponent(ignoreSslErrorsCheckBox)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(streamingConnectionCheckBox)))
+                                .addComponent(streamingConnectionCheckBox)
+                                .addComponent(resetStreamingConnectionCheckBox)
+                                ))
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel5)
@@ -232,7 +237,8 @@ public class WebSocketSamplerPanel extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(ignoreSslErrorsCheckBox)
-                    .addComponent(streamingConnectionCheckBox))
+                    .addComponent(streamingConnectionCheckBox)
+                    .addComponent(resetStreamingConnectionCheckBox))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(querystringAttributesPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
                 .addGap(8, 8, 8)
@@ -425,6 +431,7 @@ public class WebSocketSamplerPanel extends javax.swing.JPanel {
     private javax.swing.JTextField serverAddressTextField;
     private javax.swing.JTextField serverPortTextField;
     private javax.swing.JCheckBox streamingConnectionCheckBox;
+    private javax.swing.JCheckBox resetStreamingConnectionCheckBox;
     // End of variables declaration//GEN-END:variables
 
     public void initFields() {
@@ -549,13 +556,21 @@ public class WebSocketSamplerPanel extends javax.swing.JPanel {
     public String getRequestPayload() {
         return requestPayloadEditorPane.getText();
     }
-
+    
     public void setStreamingConnection(Boolean streamingConnection) {
         streamingConnectionCheckBox.setSelected(streamingConnection);
     }
-
+    
     public Boolean isStreamingConnection() {
         return streamingConnectionCheckBox.isSelected();
+    }
+
+    public void setResetStreamingConnection(Boolean resetStreamingConnection) {
+        resetStreamingConnectionCheckBox.setSelected(resetStreamingConnection);
+    }
+
+    public Boolean isResetStreamingConnection() {
+        return resetStreamingConnectionCheckBox.isSelected();
     }
 
     public void setIgnoreSslErrors(Boolean ignoreSslErrors) {

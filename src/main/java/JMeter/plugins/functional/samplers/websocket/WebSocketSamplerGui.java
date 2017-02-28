@@ -59,6 +59,7 @@ public class WebSocketSamplerGui extends AbstractSamplerGui {
             webSocketSamplerPanel.setConnectionTimeout(webSocketSamplerTestElement.getConnectionTimeout());
             webSocketSamplerPanel.setIgnoreSslErrors(webSocketSamplerTestElement.isIgnoreSslErrors());
             webSocketSamplerPanel.setStreamingConnection(webSocketSamplerTestElement.isStreamingConnection());
+            webSocketSamplerPanel.setResetStreamingConnection(webSocketSamplerTestElement.isResetStreamingConnection());
             webSocketSamplerPanel.setConnectionId(webSocketSamplerTestElement.getConnectionId());
             webSocketSamplerPanel.setResponsePattern(webSocketSamplerTestElement.getResponsePattern());
             webSocketSamplerPanel.setCloseConncectionPattern(webSocketSamplerTestElement.getCloseConncectionPattern());
@@ -98,6 +99,7 @@ public class WebSocketSamplerGui extends AbstractSamplerGui {
             webSocketSamplerTestElement.setResponseTimeout(webSocketSamplerPanel.getResponseTimeout());
             webSocketSamplerTestElement.setIgnoreSslErrors(webSocketSamplerPanel.isIgnoreSslErrors());
             webSocketSamplerTestElement.setStreamingConnection(webSocketSamplerPanel.isStreamingConnection());
+            webSocketSamplerTestElement.setResetStreamingConnection(webSocketSamplerPanel.isResetStreamingConnection());
             webSocketSamplerTestElement.setConnectionId(webSocketSamplerPanel.getConnectionId());
             webSocketSamplerTestElement.setResponsePattern(webSocketSamplerPanel.getResponsePattern());
             webSocketSamplerTestElement.setCloseConncectionPattern(webSocketSamplerPanel.getCloseConncectionPattern());

@@ -58,8 +58,8 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
     
     private static Map<String, ServiceSocket> connectionList;
     
-    private static ExecutorService executor = Executors.newCachedThreadPool(); 
-
+    private static ExecutorService executor;
+    
     public WebSocketSampler() {
         super();
         setName("WebSocket sampler");
@@ -71,14 +71,20 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
         String connectionId = getThreadName() + getConnectionId();
         
         if (isStreamingConnection() && connectionList.containsKey(connectionId)) {
-        	ServiceSocket socket = connectionList.get(connectionId);
-            socket.initialize();
-            return socket;
+            ServiceSocket socket = connectionList.get(connectionId);
+            if (!isResetStreamingConnection()) {
+                socket.initialize();
+                return socket;
+            } else {
+                connectionList.remove(connectionId);
+                socket.close();
+            }
         }
         
         //Create WebSocket client
         SslContextFactory sslContexFactory = new SslContextFactory();
         sslContexFactory.setTrustAll(isIgnoreSslErrors());
+//        WebSocketClient webSocketClient = new WebSocketClient(sslContexFactory, executor);
         WebSocketClient webSocketClient = new WebSocketClient(sslContexFactory, executor);
         
         ServiceSocket socket = new ServiceSocket(this, webSocketClient);
@@ -362,9 +368,17 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
     public void setStreamingConnection(Boolean streamingConnection) {
             setProperty("streamingConnection", streamingConnection);
     }
-
+    
     public Boolean isStreamingConnection() {
             return getPropertyAsBoolean("streamingConnection");
+    }
+    
+    public void setResetStreamingConnection(Boolean resetStreamingConnection) {
+        setProperty("resetStreamingConnection", resetStreamingConnection);
+    }
+    
+    public Boolean isResetStreamingConnection() {
+        return getPropertyAsBoolean("resetStreamingConnection");
     }
 
     public void setConnectionId(String connectionId) {
@@ -501,6 +515,7 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
     @Override
     public void testStarted(String host) {
         connectionList = new ConcurrentHashMap<String, ServiceSocket>();
+        executor = Executors.newCachedThreadPool();
     }
 
     @Override
@@ -513,6 +528,7 @@ public class WebSocketSampler extends AbstractSampler implements TestStateListen
         for (ServiceSocket socket : connectionList.values()) {
             socket.close();
         }
+        executor.shutdown();
     }
 
 
