@@ -29,7 +29,7 @@ import org.eclipse.jetty.websocket.client.WebSocketClient;
 
 /**
  *
- * @author Maciej Zaleski
+ * @author Maciej Zaleskisgsdgsdg
  */
 @WebSocket(maxTextMessageSize = 256 * 1024 * 1024)
 public class ServiceSocket {
