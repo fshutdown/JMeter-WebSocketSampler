@@ -13,7 +13,7 @@ import org.apache.log.Logger;
 
 /**
  *
- * @author Maciej Zaleski
+ * @author Maciej Zaleski fsafsaf
  */
 public class WebSocketApplicationConfig extends javax.swing.JPanel {
     private static final Logger log = LoggingManager.getLoggerForClass();
