@@ -54,13 +54,11 @@ public class ServiceSocket {
     public ServiceSocket(WebSocketSampler parent, WebSocketClient client) {
         this.parent = parent;
         this.client = client;
-        
-        //Evaluate response matching patterns in case thay contain JMeter variables (i.e. ${var})
-        responsePattern = new CompoundVariable(parent.getResponsePattern()).execute();
-        disconnectPattern = new CompoundVariable(parent.getCloseConncectionPattern()).execute();
+
+        setResponsePattern(parent.getResponsePattern());
+        setDisconnectPattern(parent.getCloseConncectionPattern());        
         logMessage.append("\n\n[Execution Flow]\n");
         logMessage.append(" - Opening new connection\n");
-        initializePatterns();
     }
 
     @OnWebSocketMessage
@@ -234,7 +232,17 @@ public class ServiceSocket {
         logMessage.append(message);
     }
 
-    protected void initializePatterns() {
+    /**
+     * Resets the patterns used to end a sample
+     * @param newResponsePattern    the new response pattern to use
+     */
+    protected void setResponsePattern(String newResponsePattern) {
+        // Evaluate response matching patterns in case thay contain JMeter variables (i.e. ${var})
+        responsePattern = new CompoundVariable(newResponsePattern).execute();
+        initializeResponsePattern();
+    }
+
+    private void initializeResponsePattern() {
         try {
             logMessage.append(" - Using response message pattern \"").append(responsePattern).append("\"\n");
             responseExpression = (responsePattern != null || !responsePattern.isEmpty()) ? Pattern.compile(responsePattern) : null;
@@ -243,7 +251,19 @@ public class ServiceSocket {
             log.error("Invalid response message regular expression pattern: " + ex.getLocalizedMessage());
             responseExpression = null;
         }
+    }
 
+    /**
+     * Resets the patterns used to close the connection
+     * @param newDisconnectPattern  the new disconnect pattern to use
+     */
+    protected void setDisconnectPattern(String newDisconnectPattern) {
+        // Evaluate response matching patterns in case thay contain JMeter variables (i.e. ${var})
+        disconnectPattern = new CompoundVariable(newDisconnectPattern).execute();
+        initializeDisconnectPattern();
+    }
+
+    private void initializeDisconnectPattern() {
         try {
             logMessage.append(" - Using disconnect pattern \"").append(disconnectPattern).append("\"\n");
             disconnectExpression = (disconnectPattern != null || !disconnectPattern.isEmpty()) ? Pattern.compile(disconnectPattern) : null;
@@ -252,7 +272,6 @@ public class ServiceSocket {
             log.error("Invalid disconnect regular regular expression pattern: " + ex.getLocalizedMessage());
             disconnectExpression = null;
         }
-
     }
 
     /**

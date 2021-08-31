@@ -71,6 +71,8 @@ public class WebSocketSamplerPanel extends javax.swing.JPanel {
         closeConncectionPatternTextField = new javax.swing.JTextField();
         jLabel16 = new javax.swing.JLabel();
         messageBacklogTextField = new javax.swing.JTextField();
+        overrideResponsePatternCheckBox = new javax.swing.JCheckBox();
+        overrideDisconnectPatternCheckBox = new javax.swing.JCheckBox();
         jPanel6 = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
         proxyAddressTextField = new javax.swing.JTextField();
@@ -250,6 +252,10 @@ public class WebSocketSamplerPanel extends javax.swing.JPanel {
 
         jLabel16.setText("Message backlog:");
 
+        overrideResponsePatternCheckBox.setText("Override previous");
+
+        overrideDisconnectPatternCheckBox.setText("Override previous");
+
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
@@ -261,14 +267,18 @@ public class WebSocketSamplerPanel extends javax.swing.JPanel {
                         .addComponent(jLabel7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(responsePatternTextField)
-                        .addGap(18, 18, 18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(overrideResponsePatternCheckBox)
+                        .addGap(6, 6, 6)
                         .addComponent(jLabel16)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(messageBacklogTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
                         .addComponent(jLabel9)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(closeConncectionPatternTextField)))
+                        .addComponent(closeConncectionPatternTextField)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(overrideDisconnectPatternCheckBox)))
                 .addContainerGap())
         );
         jPanel5Layout.setVerticalGroup(
@@ -278,14 +288,16 @@ public class WebSocketSamplerPanel extends javax.swing.JPanel {
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel16)
-                        .addComponent(messageBacklogTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(messageBacklogTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(overrideResponsePatternCheckBox))
                     .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel7)
                         .addComponent(responsePatternTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
-                    .addComponent(closeConncectionPatternTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(closeConncectionPatternTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(overrideDisconnectPatternCheckBox))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -413,6 +425,8 @@ public class WebSocketSamplerPanel extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField messageBacklogTextField;
+    private javax.swing.JCheckBox overrideDisconnectPatternCheckBox;
+    private javax.swing.JCheckBox overrideResponsePatternCheckBox;
     private javax.swing.JTextField protocolTextField;
     private javax.swing.JTextField proxyAddressTextField;
     private javax.swing.JTextField proxyPasswordTextField;
@@ -580,7 +594,23 @@ public class WebSocketSamplerPanel extends javax.swing.JPanel {
 
     public String getMessageBacklog() {
         return messageBacklogTextField.getText();
-    }    
+    }
+    
+    public void setOverrideResponsePattern(Boolean overrideResponsePattern) {
+        overrideResponsePatternCheckBox.setSelected(overrideResponsePattern);
+    }
+    
+    public Boolean isOverrideResponsePattern() {
+        return overrideResponsePatternCheckBox.isSelected();
+    }
+    
+    public void setOverrideDisconnectPattern(Boolean overrideDisconnectPattern) {
+        overrideDisconnectPatternCheckBox.setSelected(overrideDisconnectPattern);
+    }
+    
+    public Boolean isOverrideDisconnectPattern() {
+        return overrideDisconnectPatternCheckBox.isSelected();
+    }
 
     /**
      * @return the attributePanel
