@@ -7,7 +7,8 @@ package JMeter.plugins.functional.samplers.websocket;
 import java.io.IOException;
 import java.util.Deque;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -37,7 +38,7 @@ public class ServiceSocket {
     protected final WebSocketSampler parent;
     protected WebSocketClient client;
     private static final Logger log = LoggingManager.getLoggerForClass();
-    protected Deque<String> responeBacklog = new LinkedList<String>();
+    protected Queue<String> responseBacklog = new ConcurrentLinkedQueue<>();
     protected Integer error = 0;
     protected StringBuffer logMessage = new StringBuffer();
     protected CountDownLatch openLatch = new CountDownLatch(1);
@@ -138,13 +139,13 @@ public class ServiceSocket {
     }
 
     /**
-     * @return response message made of messages saved in the responeBacklog cache
+     * @return response message made of messages saved in the responseBacklog cache
      */
     public String getResponseMessage() {
         String responseMessage = "";
         
-        //Iterate through response messages saved in the responeBacklog cache
-        Iterator<String> iterator = responeBacklog.iterator();
+        //Iterate through response messages saved in the responseBacklog cache
+        Iterator<String> iterator = responseBacklog.iterator();
         while (iterator.hasNext()) {
             responseMessage += iterator.next();
         }
@@ -279,9 +280,9 @@ public class ServiceSocket {
             messageBacklog = WebSocketSampler.MESSAGE_BACKLOG_COUNT;
         }
 
-        while (responeBacklog.size() >= messageBacklog) {
-            responeBacklog.poll();
+        while (responseBacklog.size() >= messageBacklog) {
+            responseBacklog.poll();
         }
-        responeBacklog.add(message);
+        responseBacklog.add(message);
     }
 }
